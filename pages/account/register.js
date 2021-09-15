@@ -8,12 +8,14 @@ import AuthContext from '@/context/AuthContext';
 import styles from '@/styles/AuthForm.module.css';
 
 const RegisterPage = () => {
-  const [userName, setUserName] = useState('');
+  const [username, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
   const { register, error } = useContext(AuthContext);
+
+  useEffect(() => error && toast.error(error));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ const RegisterPage = () => {
             <label htmlFor='username'>Username</label>
             <input
               type='text'
-              value={userName}
+              value={username}
               id='username'
               onChange={(e) => setUserName(e.target.value)}
             />
@@ -68,7 +70,7 @@ const RegisterPage = () => {
               onChange={(e) => setPasswordConfirm(e.target.value)}
             />
           </div>
-          <input type='submit' value='Login' className='btn' />
+          <input type='submit' value='Register' className='btn' />
         </form>
         <p>
           Already have an account? <Link href='/account/login'>Login</Link>

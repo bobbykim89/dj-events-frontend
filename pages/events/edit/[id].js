@@ -11,8 +11,9 @@ import Link from 'next/dist/client/link';
 import Image from 'next/dist/client/image';
 import { API_URL } from '@/config/index';
 import styles from '@/styles/Form.module.css';
+import { parseCookies } from '@/helpers/index';
 
-const EditEventsPage = ({ evt }) => {
+const EditEventsPage = ({ evt, token }) => {
   const [values, setValues] = useState({
     name: evt.name,
     performers: evt.performers,
@@ -47,10 +48,15 @@ const EditEventsPage = ({ evt }) => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(values),
     });
     if (!res.ok) {
+      if (res.status === 4 - 3 || res.status === 401) {
+        toast.error('Unauthorized');
+        return;
+      }
       toast.error('Something Went Wrong');
     } else {
       const evt = await res.json();
@@ -167,7 +173,11 @@ const EditEventsPage = ({ evt }) => {
         </button>
       </div>
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <ImageUpload evtId={evt.id} imageUploaded={imageUploaded} />
+        <ImageUpload
+          evtId={evt.id}
+          imageUploaded={imageUploaded}
+          token={token}
+        />
       </Modal>
     </Layout>
   );
@@ -176,14 +186,15 @@ const EditEventsPage = ({ evt }) => {
 export default EditEventsPage;
 
 export async function getServerSideProps({ params: { id }, req }) {
+  const { token } = parseCookies(req);
+
   const res = await fetch(`${API_URL}/events/${id}`);
   const evt = await res.json();
-
-  console.log(req.headers.cookie);
 
   return {
     props: {
       evt,
+      token,
     },
   };
 }
